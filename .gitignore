@@ -1,0 +1,40 @@
+
+# ==============================
+# RamanSeg Git Ignore
+# ==============================
+
+# Raw and processed datasets
+/data/
+
+# Calibration intermediate data
+/calibration/handeye_gemini/DetectedCorners/
+/calibration/handeye_gemini/robot_poses/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Environment variables and secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated checkerboard visualization images
+/calibration/handeye_gemini/diagnostics/corners/*.png

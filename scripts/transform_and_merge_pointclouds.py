@@ -165,6 +165,16 @@ def parse_arguments():
         help="Write machine-readable fusion statistics to this JSON file.",
     )
 
+    parser.add_argument(
+        "--expected_frame_count",
+        type=int,
+        default=None,
+        help=(
+            "Require exactly this many contiguous frames starting at 1. "
+            "When omitted, the count is inferred from the input files."
+        ),
+    )
+
     return parser.parse_args()
 
 
@@ -407,11 +417,16 @@ def main():
             )
         )
 
-    expected_frame_ids = list(range(1, 76))
+    expected_count = (
+        args.expected_frame_count
+        if args.expected_frame_count is not None
+        else len(cloud_frame_ids)
+    )
+    expected_frame_ids = list(range(1, expected_count + 1))
     if cloud_frame_ids != expected_frame_ids:
         raise ValueError(
-            "RamanSeg fusion requires point-cloud frame IDs 1..75; got {}".format(
-                cloud_frame_ids
+            "RamanSeg fusion requires point-cloud frame IDs 1..{}; got {}".format(
+                expected_count, cloud_frame_ids
             )
         )
 
@@ -618,16 +633,17 @@ def main():
 
     print("Saved merged point cloud:", args.output)
 
-    if len(processed_pose_frame_ids) != 75:
+    expected_processed_count = expected_count - len(excluded_pose_frame_ids)
+    if len(processed_pose_frame_ids) != expected_processed_count:
         raise RuntimeError(
-            "Expected all 75 fusion frames, processed {}".format(
-                len(processed_pose_frame_ids)
+            "Expected {} fusion frames, processed {}".format(
+                expected_processed_count, len(processed_pose_frame_ids)
             )
         )
-    if skipped_pose_frame_ids:
+    if set(skipped_pose_frame_ids) != excluded_pose_frame_ids:
         raise RuntimeError(
-            "No RamanSeg fusion frame may be excluded: {}".format(
-                skipped_pose_frame_ids
+            "Skipped frames do not equal requested exclusions: {} vs {}".format(
+                skipped_pose_frame_ids, sorted(excluded_pose_frame_ids)
             )
         )
 
@@ -637,6 +653,7 @@ def main():
         "processed_frame_ids": processed_pose_frame_ids,
         "skipped_frame_ids": skipped_pose_frame_ids,
         "processed_frame_count": len(processed_pose_frame_ids),
+        "source_frame_count": expected_count,
         "total_input_points": int(total_input_points),
         "total_per_frame_points_after_downsampling": int(
             total_points_after_frame_downsampling

@@ -1,0 +1,14 @@
+ply
+format ascii 1.0
+comment RGB-only unsupervised KMeans K=6
+element vertex 1
+property double x
+property double y
+property double z
+property uchar red
+property uchar green
+property uchar blue
+property int original_index
+property uchar cluster_id
+end_header
+-0.372372090816 -0.239494502544 0.040164809674 129 120 124 667 2

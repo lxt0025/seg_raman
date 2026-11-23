@@ -2,6 +2,7 @@
 
 """Validate RamanSeg inputs and create JAKA TCP gripper-to-base poses."""
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -12,10 +13,9 @@ from scipy.spatial.transform import Rotation
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / "data/raw"
-POSE_DIR = ROOT / "calibration/handeye_gemini/robot_poses"
-REPORT_DIR = ROOT / "reports/handeye_gemini"
-EXPECTED_IDS = list(range(1, 76))
+DEFAULT_RAW = ROOT / "data/raw"
+DEFAULT_POSE_DIR = ROOT / "calibration/handeye_gemini/robot_poses"
+DEFAULT_REPORT_DIR = ROOT / "reports/handeye_gemini"
 
 # JAKA SDK rpy_to_rot_matrix reference example. The RotMatrix C struct stores
 # rows as x.*, y.*, z.*; the Python SDK documents the return as row-major.
@@ -40,7 +40,7 @@ def frame_id(path):
     return int(match.group(1))
 
 
-def indexed_files(folder, pattern):
+def indexed_files(folder, pattern, expected_ids=None):
     result = {}
     for path in folder.glob(pattern):
         identifier = frame_id(path)
@@ -51,13 +51,23 @@ def indexed_files(folder, pattern):
                 )
             )
         result[identifier] = path
-    if sorted(result) != EXPECTED_IDS:
+    if expected_ids is not None and sorted(result) != list(expected_ids):
         raise ValueError(
-            "{} / {} IDs do not equal 1..75; got {}".format(
-                folder, pattern, sorted(result)
+            "{} / {} IDs do not equal expected IDs {}; got {}".format(
+                folder, pattern, list(expected_ids), sorted(result)
             )
         )
     return result
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Validate one RamanSeg capture and create JAKA TCP poses."
+    )
+    parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW)
+    parser.add_argument("--pose-dir", type=Path, default=DEFAULT_POSE_DIR)
+    parser.add_argument("--report-dir", type=Path, default=DEFAULT_REPORT_DIR)
+    return parser.parse_args()
 
 
 def read_ply_vertex_count(path):
@@ -115,24 +125,39 @@ def validate_rotation(rotation, label):
 
 
 def main():
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    POSE_DIR.mkdir(parents=True, exist_ok=True)
+    args = parse_arguments()
+    raw = args.raw_dir.resolve()
+    pose_dir = args.pose_dir.resolve()
+    report_dir = args.report_dir.resolve()
+    report_dir.mkdir(parents=True, exist_ok=True)
+    pose_dir.mkdir(parents=True, exist_ok=True)
 
     sdk_reference_error = validate_sdk_convention()
 
-    images = indexed_files(RAW / "images", "frame-*.color.png")
-    frame_json = indexed_files(RAW / "frame_info", "frame-*.info.json")
+    images = indexed_files(raw / "images", "frame-*.color.png")
+    expected_ids = sorted(images)
+    if not expected_ids or expected_ids != list(range(1, len(expected_ids) + 1)):
+        raise ValueError(
+            "RGB frame IDs must be contiguous and start at 1; got {}".format(
+                expected_ids
+            )
+        )
+    frame_json = indexed_files(
+        raw / "frame_info", "frame-*.info.json", expected_ids
+    )
     clouds = indexed_files(
-        RAW / "pointcloud", "frame-*.pointcloud_color_rgb_correct.ply"
+        raw / "pointcloud",
+        "frame-*.pointcloud_color_rgb_correct.ply",
+        expected_ids,
     )
     depth_png = indexed_files(
-        RAW / "depth", "frame-*.aligned_depth_raw_uint16.png"
+        raw / "depth", "frame-*.aligned_depth_raw_uint16.png", expected_ids
     )
     depth_npy = indexed_files(
-        RAW / "depth", "frame-*.aligned_depth_m.npy"
+        raw / "depth", "frame-*.aligned_depth_m.npy", expected_ids
     )
 
-    with (RAW / "robot_session_info.json").open(
+    with (raw / "robot_session_info.json").open(
         "r", encoding="utf-8"
     ) as stream:
         session = json.load(stream)
@@ -149,7 +174,7 @@ def main():
     input_point_count = 0
     per_frame = []
 
-    for identifier in EXPECTED_IDS:
+    for identifier in expected_ids:
         image = cv2.imread(str(images[identifier]), cv2.IMREAD_COLOR)
         if image is None or image.shape[:2] != (720, 1280):
             raise ValueError(
@@ -198,7 +223,7 @@ def main():
         transform = np.eye(4, dtype=np.float64)
         transform[:3, :3] = rotation
         transform[:3, 3] = pose[:3] / 1000.0
-        np.save(POSE_DIR / "frame-{:06d}.npy".format(identifier), transform)
+        np.save(pose_dir / "frame-{:06d}.npy".format(identifier), transform)
 
         translations.append(transform[:3, 3])
         determinants.append(determinant)
@@ -214,7 +239,7 @@ def main():
             }
         )
 
-    saved = indexed_files(POSE_DIR, "frame-*.npy")
+    saved = indexed_files(pose_dir, "frame-*.npy", expected_ids)
     for identifier, path in saved.items():
         transform = np.load(path)
         if transform.shape != (4, 4):
@@ -226,8 +251,8 @@ def main():
     translations = np.asarray(translations)
     report = {
         "status": "passed",
-        "frame_ids": EXPECTED_IDS,
-        "frame_count": 75,
+        "frame_ids": expected_ids,
+        "frame_count": len(expected_ids),
         "rgb_count": len(images),
         "depth_png_count": len(depth_png),
         "depth_npy_count": len(depth_npy),
@@ -248,15 +273,23 @@ def main():
         "translation_min_m": translations.min(axis=0).tolist(),
         "translation_max_m": translations.max(axis=0).tolist(),
         "pointcloud_header_vertex_total": input_point_count,
-        "pose_output_directory": str(POSE_DIR.resolve()),
+        "raw_input_directory": str(raw),
+        "pose_output_directory": str(pose_dir),
         "per_frame": per_frame,
     }
-    report_path = REPORT_DIR / "pose_validation.json"
+    report_path = report_dir / "pose_validation.json"
     with report_path.open("w", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)
 
-    print("Validated 75 RGB, depth, frame JSON, and point-cloud inputs.")
-    print("Generated 75 T_gripper2base poses:", POSE_DIR)
+    print(
+        "Validated {} RGB, depth, frame JSON, and point-cloud inputs.".format(
+            len(expected_ids)
+        )
+    )
+    print(
+        "Generated {} T_gripper2base poses:".format(len(expected_ids)),
+        pose_dir,
+    )
     print("Max R.T @ R error:", max(orthogonality_errors))
     print("det(R) range:", min(determinants), max(determinants))
     print("Pose validation report:", report_path)

@@ -1,0 +1,6 @@
+method,valid,mean_translation_residual_mm,mean_rotation_residual_deg,outlier_count,selected
+TSAI,1,0.152882399,0.029246898,4,0
+PARK,1,0.151360639,0.029054406,4,0
+HORAUD,1,0.151359262,0.029054480,4,1
+ANDREFF,1,0.152880839,0.029053598,3,0
+DANIILIDIS,1,0.154638042,0.029244476,4,0

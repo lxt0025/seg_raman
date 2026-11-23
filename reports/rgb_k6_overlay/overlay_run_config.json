@@ -1,0 +1,61 @@
+{
+  "original_ply": "/home/root01/ramanseg/data/processed/roi/ramanseg_1120.ply",
+  "assignments_csv": "/home/root01/ramanseg/reports/agarose_rgb_k6/point_assignments_rgb_k6.csv",
+  "valid_original_points": 940,
+  "assignment_rows": 940,
+  "point_index_order_valid": true,
+  "xyz_match_max_abs_error": 4.999889391399392e-13,
+  "rgb_match_max_abs_error": 4.902189765232379e-13,
+  "cluster_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "cluster_colors_rgb": {
+    "0": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "1": [
+      0.0,
+      0.2,
+      1.0
+    ],
+    "2": [
+      0.0,
+      0.7,
+      0.0
+    ],
+    "3": [
+      1.0,
+      0.5,
+      0.0
+    ],
+    "4": [
+      0.6,
+      0.1,
+      0.8
+    ],
+    "5": [
+      0.0,
+      0.85,
+      0.85
+    ]
+  },
+  "projection": "orthographic scatter; XY main, XZ/YZ supplemental",
+  "base_alpha": 0.38,
+  "overlay_alpha": 0.7,
+  "base_point_size": 34,
+  "overlay_point_size": 19,
+  "outputs": {
+    "xy_overlay": "/home/root01/ramanseg/reports/rgb_k6_overlay/rgb_k6_xy_overlay.png",
+    "xy_cluster_only": "/home/root01/ramanseg/reports/rgb_k6_overlay/rgb_k6_xy_cluster_only.png",
+    "xy_base_only": "/home/root01/ramanseg/reports/rgb_k6_overlay/rgb_k6_xy_base_only.png",
+    "xz_overlay": "/home/root01/ramanseg/reports/rgb_k6_overlay/rgb_k6_xz_overlay.png",
+    "yz_overlay": "/home/root01/ramanseg/reports/rgb_k6_overlay/rgb_k6_yz_overlay.png"
+  }
+}

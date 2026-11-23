@@ -1,0 +1,46 @@
+{
+  "original_ply": "/home/root01/ramanseg/data/processed/roi/ramanseg_1120.ply",
+  "point_level_k6_csv_for_validation": "/home/root01/ramanseg/reports/agarose_rgb_k6/point_assignments_rgb_k6.csv",
+  "grid_config": "/home/root01/ramanseg/reports/stage3_grid4x6/grid_config.json",
+  "grid_columns": 4,
+  "grid_rows": 6,
+  "sample_count": 24,
+  "features_per_sample": 21,
+  "feature_channels": [
+    "R",
+    "G",
+    "B"
+  ],
+  "statistics": [
+    "mean",
+    "std",
+    "median",
+    "min",
+    "max",
+    "q25",
+    "q75"
+  ],
+  "kmeans": {
+    "n_clusters": 6,
+    "n_init": 100,
+    "random_state": 42
+  },
+  "scaler": "StandardScaler fitted across 24 grid samples",
+  "pca_visualization_only": true,
+  "cluster_palette": [
+    "#ff3333",
+    "#3366ff",
+    "#22aa44",
+    "#ff941a",
+    "#a52bd1",
+    "#06c9d2"
+  ],
+  "grid_bounds_m": {
+    "xmin": -0.38870561122894287,
+    "xmax": -0.3536190986633301,
+    "ymin": -0.2398119419813156,
+    "ymax": -0.18566857278347015
+  },
+  "point_count": 940,
+  "point_csv_xyz_max_abs_error": 4.999889391399392e-13
+}

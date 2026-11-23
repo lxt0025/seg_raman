@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import re
 import json
+import argparse
 from pathlib import Path
 
 
@@ -1390,14 +1391,29 @@ class CameraCalibration:
 
 
 if __name__ == "__main__":
-    repository_root = Path(__file__).resolve().parents[1]
-    image_folder = repository_root / "data/raw/images"
-    pose_folder = (
-        repository_root
-        / "calibration/handeye_gemini/robot_poses"
+    parser = argparse.ArgumentParser(
+        description="Run Gemini hand-eye calibration for one RamanSeg capture."
     )
-    output_root = repository_root / "calibration/handeye_gemini"
-    camera_info_path = repository_root / "data/raw/camera_info.json"
+    repository_root = Path(__file__).resolve().parents[1]
+    parser.add_argument(
+        "--raw-dir", type=Path, default=repository_root / "data/raw"
+    )
+    parser.add_argument(
+        "--pose-dir",
+        type=Path,
+        default=repository_root / "calibration/handeye_gemini/robot_poses",
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=repository_root / "calibration/handeye_gemini",
+    )
+    args = parser.parse_args()
+    raw_dir = args.raw_dir.resolve()
+    image_folder = raw_dir / "images"
+    pose_folder = args.pose_dir.resolve()
+    output_root = args.output_root.resolve()
+    camera_info_path = raw_dir / "camera_info.json"
 
     with camera_info_path.open("r", encoding="utf-8") as stream:
         camera_info = json.load(stream)
@@ -1413,10 +1429,6 @@ if __name__ == "__main__":
     D = np.asarray(
         color_camera["distortion"]["opencv_order"], dtype=np.float64
     )
-    expected_valid_frame_ids = [
-        frame_id for frame_id in range(1, 76) if frame_id != 42
-    ]
-
     calibration = CameraCalibration(
         image_folder=str(image_folder),
         transforms_folder=str(pose_folder),
@@ -1428,5 +1440,5 @@ if __name__ == "__main__":
         intrinsic_matrix=K,
         distortion_coefficients=D,
         output_root=str(output_root),
-        expected_valid_frame_ids=expected_valid_frame_ids,
+        expected_valid_frame_ids=None,
     )

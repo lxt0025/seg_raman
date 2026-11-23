@@ -1,0 +1,90 @@
+{
+  "input_ply": "/home/root01/ramanseg/data/processed/roi/ramanseg_1120.ply",
+  "output_directory": "/home/root01/ramanseg/reports/agarose_rgb_k6",
+  "original_point_count": 940,
+  "valid_point_count": 940,
+  "invalid_point_count": 0,
+  "rgb_input_encoding": "normalized_[0,1]",
+  "rgb_normalized_min": [
+    0.12549019607843137,
+    0.09411764705882353,
+    0.10196078431372549
+  ],
+  "rgb_normalized_max": [
+    0.5058823529411764,
+    0.47058823529411764,
+    0.48627450980392156
+  ],
+  "features": [
+    "R",
+    "G",
+    "B"
+  ],
+  "xyz_used_by_kmeans": false,
+  "scaler": {
+    "type": "StandardScaler",
+    "mean": [
+      0.20124739257405175,
+      0.1402461410095962,
+      0.15454735085523685
+    ],
+    "scale": [
+      0.031083328026389405,
+      0.025453938080602517,
+      0.025050706903123603
+    ]
+  },
+  "kmeans": {
+    "n_clusters": 6,
+    "n_init": 50,
+    "random_state": 42,
+    "max_iter": 500,
+    "inertia": 460.9793647056273,
+    "n_iter": 8
+  },
+  "pca_visualization_only": true,
+  "pca_explained_variance_percentage": [
+    89.58687138685076,
+    7.906033632685072
+  ],
+  "spatial_components": {
+    "method": "radius_graph_connected_components_within_each_RGB_cluster",
+    "radius_m": 0.002301838522550163,
+    "global_nearest_neighbor_median_m": 0.0009207354090200651,
+    "global_nearest_neighbor_p95_m": 0.001777153584694309,
+    "radius_rule": "max(2.5*median_NN, 1.25*p95_NN)",
+    "xyz_fed_back_to_kmeans": false
+  },
+  "visualization_palette_rgb_normalized": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.2,
+      1.0
+    ],
+    [
+      0.0,
+      0.7,
+      0.0
+    ],
+    [
+      1.0,
+      0.5,
+      0.0
+    ],
+    [
+      0.6,
+      0.1,
+      0.8
+    ],
+    [
+      0.0,
+      0.85,
+      0.85
+    ]
+  ]
+}

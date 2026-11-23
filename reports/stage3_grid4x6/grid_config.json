@@ -1,0 +1,19 @@
+{
+  "xmin": -0.38870561122894287,
+  "xmax": -0.3536190986633301,
+  "ymin": -0.2398119419813156,
+  "ymax": -0.18566857278347015,
+  "n_cols": 4,
+  "n_rows": 6,
+  "initial_bounds_source": "current K=6 ROI point-cloud XY extent",
+  "note": "Edit xmin/xmax/ymin/ymax to refine matrix ROI; no point coordinates are changed.",
+  "input_ply": "/home/root01/ramanseg/data/processed/roi/ramanseg_1120.ply",
+  "assignment_csv": "/home/root01/ramanseg/reports/agarose_rgb_k6/point_assignments_rgb_k6.csv",
+  "point_count": 940,
+  "points_in_grid_range": 940,
+  "unassigned_outside_grid": 0,
+  "low_margin_threshold": 0.1,
+  "minimum_points": 3,
+  "model_and_scaler_saved": false,
+  "voting": "point-label majority vote; no distance confidence"
+}
